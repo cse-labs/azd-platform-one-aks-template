@@ -1,3 +1,6 @@
+@description('Custom tags to apply to the resources')
+param tags object = {}
+
 @description('Specifies the name of the key vault.')
 param kvName string
 
@@ -40,6 +43,7 @@ param policyName string = 'add'
 resource kv 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
   name: take(kvName, 23)
   location: location
+  tags: tags
   properties: {
     enabledForDeployment: enabledForDeployment
     tenantId: subscription().tenantId

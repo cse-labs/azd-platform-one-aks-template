@@ -82,6 +82,7 @@ module kv 'modules/keyvault.bicep' = {
   name: 'kv'
   params: {
     location: location
+    tags: tags
     principalId: principalId
     kvName: '${abbrs.keyVaultVaults}${resourceToken}'
   }
