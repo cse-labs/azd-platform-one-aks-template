@@ -1,0 +1,33 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "environmentName": {
+        "value": "${AZURE_ENV_NAME}"
+      },
+      "location": {
+        "value": "${AZURE_LOCATION}"
+      },
+      "principalId": {
+        "value": "${AZURE_PRINCIPAL_ID}"
+      },
+      "kubernetesVersion": {
+        "value": "1.25.6"
+      },
+      "githubToken": {
+        "value": "${GITHUB_TOKEN}"
+      },
+      "ironbankUsername": {
+        "value": "${P1_REGISTRY_USERNAME}"
+      },
+      "ironbankPassword": {
+        "value": "${P1_REGISTRY_PASSWORD}"
+      },
+      "gitopsRepo": {
+        "value": "${GITOPS_REPO}"
+      },
+      "gitopsReleaseBranch": {
+        "value": "main"
+      }
+    }
+  }
