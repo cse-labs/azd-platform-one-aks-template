@@ -12,10 +12,17 @@ function enableAzureSubPlugins() {
 }
 
 function githubAuthFlow() {
-  if [[ -z "$GITHUB_TOKEN" ]]; then
+  GH_PAT=$GITHUB_TOKEN
+
+  if [[ -z "$GH_PAT" ]]; then
     echo "Prompting for GH Auth given GITHUB_TOKEN is undefined"
     gh auth login --scopes read:org,repo,workflow
   else
+    unset GITHUB_TOKEN # Clear the token to verify
+    gh auth logout # Logout to verify 
+    tmpfile=$(mktemp /tmp/token_tmp.XXXXXX)
+    echo $GH_PAT > $tmpfile
+    gh auth login --with-token < $tmpfile
     gh auth status
   fi
 

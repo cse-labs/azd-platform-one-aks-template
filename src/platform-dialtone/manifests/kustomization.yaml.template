@@ -1,14 +1,15 @@
 # When updating the version of BigBang, make sure to update
 #   both the bases reference and the GitRepository reference
-bases:
+resources:
   - git::https://repo1.dso.mil/platform-one/big-bang/bigbang.git//base?ref=${BB_TAG}
+
 configMapGenerator:
   - name: common
     behavior: merge
     files:
-      - values.yaml=bigbang.configmap.yaml
+      - values.yaml=./infrastructure/bigbang.configmap.yaml
 patchesStrategicMerge:
-  - secrets.enc.yaml
+  - ./infrastructure/secrets.enc.yaml
   - |-
     apiVersion: source.toolkit.fluxcd.io/v1beta2
     kind: GitRepository
