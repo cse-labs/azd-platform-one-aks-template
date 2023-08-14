@@ -74,6 +74,8 @@ module other 'modules/monitoring.bicep' = if(enableMonitoring) {
   params: {
     location: location
     name: '${abbrs.monitor}${environmentName}'
+    applicationInsightsName: '${abbrs.insightsComponents}${resourceToken}'
+    applicationInsightsDashboardName: '${abbrs.portalDashboards}${resourceToken}'    
   }
 }
 
@@ -106,6 +108,14 @@ module keyVaultSecrets 'modules/keyvault-secrets.bicep' = {
       {
         name: 'ironbankPassword'
         value: ironbankPassword
+      }
+      {
+        name: 'appInsightsInstrumentationKey'
+        value: other.outputs.instrumentationKey
+      }
+      {
+        name: 'appInsightsConnectionString'
+        value: other.outputs.connectionString
       }
     ]
   }
@@ -152,6 +162,8 @@ module containerRegistryAccess 'modules/aks-acr-role-assignment.bicep' = {
   }
 }
 
+output APPLICATIONINSIGHTS_CONNECTION_STRING string = other.outputs.connectionString
+output APPLICATIONINSIGHTS_NAME string = other.outputs.appInsightsName
 output AZURE_AKS_CLUSTER_NAME string = aks.outputs.clusterName
 output AZURE_AKS_CLUSTERIDENTITY_OBJECT_ID string = aks.outputs.clusterIdentity.objectId
 output AZURE_AKS_CLUSTERIDENTITY_CLIENT_ID string = aks.outputs.clusterIdentity.clientId

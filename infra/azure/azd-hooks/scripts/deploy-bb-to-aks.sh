@@ -9,7 +9,7 @@ export BB_TAG="2.5.0"
 export GITOPS_REPO_PATH=/environments/${AZURE_ENV_NAME}/src/manifests
 BB_REPO="https://repo1.dso.mil/platform-one/big-bang/bigbang.git"
 TEMPLATE_ROOT=$PWD/../../../../src/platform-dialtone/manifests/
-BB_DEPLOYMENT_YAML_FILENAME=bigbang.yaml
+BB_DEPLOYMENT_YAML_FILENAME=infrastructure/bigbang.yaml
 
 indent() {
   local indentSize=2
