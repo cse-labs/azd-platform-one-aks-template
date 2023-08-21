@@ -86,6 +86,7 @@ module kv 'modules/keyvault.bicep' = {
     location: location
     tags: tags
     principalId: principalId
+    clusterPrincipalId: aks.outputs.keyvaultProviderIdentity.objectId
     kvName: '${abbrs.keyVaultVaults}${resourceToken}'
   }
 }
@@ -127,6 +128,7 @@ module aks 'modules/aks.bicep' = {
   params: {
     location: location
     tags: union(aksTags, tags)
+    principalId: principalId
     name: '${abbrs.containerServiceManagedClusters}${resourceToken}'
     // Base AKS config like version and nodes sizes
     kube: kube
@@ -167,6 +169,8 @@ output APPLICATIONINSIGHTS_NAME string = other.outputs.appInsightsName
 output AZURE_AKS_CLUSTER_NAME string = aks.outputs.clusterName
 output AZURE_AKS_CLUSTERIDENTITY_OBJECT_ID string = aks.outputs.clusterIdentity.objectId
 output AZURE_AKS_CLUSTERIDENTITY_CLIENT_ID string = aks.outputs.clusterIdentity.clientId
+output AZURE_AKS_KV_IDENTITY_OBJECT_ID string = aks.outputs.keyvaultProviderIdentity.objectId
+output AZURE_AKS_KV_IDENTITY_CLIENT_ID string = aks.outputs.keyvaultProviderIdentity.clientId
 output AZURE_RESOURCE_GROUP string = resourceGroup.name
 output clusterFQDN string = aks.outputs.clusterFQDN
 output aksState string = aks.outputs.provisioningState
@@ -180,3 +184,4 @@ output AZURE_CONTAINER_REGISTRY_ENDPOINT string = acr.outputs.loginServer
 output AZURE_CONTAINER_REGISTRY_NAME string = acr.outputs.name
 output AZURE_CONTAINER_REGISTRY_RESOURCE_GROUP string = resourceGroup.name
 output GITOPS_REPO_RELEASE_BRANCH string = gitopsReleaseBranch
+

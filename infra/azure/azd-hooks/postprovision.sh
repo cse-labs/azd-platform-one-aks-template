@@ -61,7 +61,7 @@ function createInitialNamespaces() {
 sourceAzdEnvVars
 
 echo "Retrieving cluster credentials"
-az aks get-credentials --resource-group ${AZURE_RESOURCE_GROUP} --name ${AZURE_AKS_CLUSTER_NAME}
+az aks get-credentials --resource-group ${AZURE_RESOURCE_GROUP} --name ${AZURE_AKS_CLUSTER_NAME} --admin
 
 createIstioCerts
 createPgpPrivateKey

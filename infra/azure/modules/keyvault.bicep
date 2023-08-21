@@ -7,6 +7,9 @@ param kvName string
 @description('Specifies the Azure location where the key vault should be created.')
 param location string = resourceGroup().location
 
+@description('Specifies the object ID of AKS cluster identity.')
+param clusterPrincipalId string
+
 @description('Specifies whether Azure Virtual Machines are permitted to retrieve certificates stored as secrets from the key vault.')
 param enabledForDeployment bool = false
 
@@ -39,6 +42,8 @@ param certificatePermissions array = [
 param skuName string = 'standard'
 param principalId string = ''
 param policyName string = 'add'
+
+var keyVaultSecretsUserRoleDefinitionId = resourceId('Microsoft.Authorization/roleDefinitions', '4633458b-17de-408a-b874-0445c86b69e6')
 
 resource kv 'Microsoft.KeyVault/vaults@2021-11-01-preview' = {
   name: take(kvName, 23)
@@ -75,11 +80,27 @@ resource keyVaultAccessPolicies 'Microsoft.KeyVault/vaults/accessPolicies@2022-0
   parent: kv
   name: policyName
   properties: {
-    accessPolicies: [ {
+    accessPolicies: [ 
+      {
         objectId: principalId
         tenantId: subscription().tenantId
         permissions: { secrets: secretsPermissions }
-      } ]
+      },{
+        objectId: clusterPrincipalId
+        tenantId: subscription().tenantId
+        permissions: { secrets: secretsPermissions }
+      }
+    ]
+  }
+}
+
+resource keyVaultCSIdriverSecretsUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: kv
+  name: guid(kv.id, 'CSIDriver', keyVaultSecretsUserRoleDefinitionId)
+  properties: {
+    roleDefinitionId: keyVaultSecretsUserRoleDefinitionId
+    principalType: 'ServicePrincipal'
+    principalId: clusterPrincipalId
   }
 }
 
