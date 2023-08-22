@@ -50,7 +50,7 @@ resource aks 'Microsoft.ContainerService/managedClusters@2020-12-01' = {
     enableRBAC: true
     aadProfile: {
       managed: true
-      enableAzureRBAC: false
+      enableAzureRBAC: true
       tenantID: subscription().tenantId
     }
     agentPoolProfiles: [
