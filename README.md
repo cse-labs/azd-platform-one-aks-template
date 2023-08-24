@@ -2,8 +2,6 @@
 
 This is the [AZD](https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/overview) [Platform One](https://p1.dso.mil/services/big-bang) (AKS) template. This solution is based off Big Bang's customer [template](https://repo1.dso.mil/platform-one/big-bang/customers/template).
 
-![image](https://github.com/erikschlegel/k8-gitops-manifests/assets/7635865/a758cb63-0361-4ef7-9bbe-0a7f8ee8c224)
-
 ## Customer Use-Case
 
 Platform Teams seeking to onboard Software Factories like Platform One involves a complex setup process requiring deep technical expertise with limited dev tools available to help automate the journey.
@@ -70,12 +68,14 @@ This project includes a VSCode dev container to help automate the setup of the r
 The Big Bang software factory Helm chart pulls it's platform docker images from the Iron Bank registry. Each deployment requires Iron Bank credentials to be provided as secrets in the Github repository. Follow these [instructions](https://login.dso.mil/auth/realms/baby-yoda/protocol/openid-connect/registrations?client_id=account&response_type=code) for setting up a new Iron Bank account. The setup wizard will prompt the deployment operator for the iron bank username and password credentials.
 
 #### Azure Developer CLI
-Follow these [instructions](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd) to install the Azure Developer CLI onto your local workstation
+Follow these [instructions](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd) to install the Azure Developer CLI onto your workstation
 
 #### Github Access Token
 [create a GitHub personal access token (PAT)](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with `repo`, `write:package` and `workflow` scopes. If you are part of a single sign-on (SSO) organization, you may need to authorize your PAT using `Configure SSO`.
 
 ## Install
+
+![Template Installation Steps](./images/AzdProvisionFlow.gif)
 
 ### Azure Login
 
@@ -100,7 +100,7 @@ If you are starting from this end state repo, use `azd init` to clone this templ
 ```sh
 mkdir my-platform
 cd my-platform
-azd init -t erikschlegel/azd-big-bang
+azd init -t cse-labs/azd-platform-one-aks-template
 ```
 
 #### Local Workstation Usage - Option 1: Setup Local Dev Container
@@ -131,6 +131,8 @@ azd provision
 
 ### Continuous integration/continuous deployment
 
+![Github Repository Setup Steps](./images/AzdPipelineSetupFlow.gif)
+
 The workflow [azure-dev.yaml](./.github/workflows/azure-dev.yaml) uses the Azure Developer CLI container image which has the CLI installed to login to the Azure environment with `azd login`, provision the infrastructure with `azd provision`.
 
 To configure the GitHub repository with the secrets needed to run the pipeline, you'll need to run `azd pipeline config`.
@@ -152,6 +154,10 @@ chmod -R +x ./infra/azure/azd-hooks/postpipelineconfig.sh && ./infra/azure/azd-h
 ```
 
 ## Big Bang Usage
+
+### Application Onboarding
+
+Follow the instructions in the [Big Bang Application Onboarding Guide](https://github.com/cse-labs/azd-python-p1-service-template) to onboard your application to your cluster.
 
 ###  Local Workstation Testing Only - Configure local domain to IP address mapping
 The Big Bang deployed platform services are accessible by dns entries like kiali.bigbang.dev, grafana.bigbang.dev, etc.
@@ -181,6 +187,7 @@ Before moving to Production, you'll want to choose a certificate authority to ge
 
 ## See Also
 
+- [Big Bang Application Onboarding Guide](https://github.com/cse-labs/azd-python-p1-service-template)
 - [Credentials for Big Bang Packages](https://repo1.dso.mil/platform-one/big-bang/bigbang/-/blob/master/docs/guides/using-bigbang/default-credentials.md#packages-with-built-in-authentication)
 - [Big Bang Package Architecture](https://repo1.dso.mil/platform-one/big-bang/bigbang/-/tree/master/docs/understanding-bigbang/package-architecture#dependency-tree)
 - [Big Bang Configuration Overview](https://repo1.dso.mil/platform-one/big-bang/bigbang/-/blob/master/docs/understanding-bigbang/configuration/configuration.md)

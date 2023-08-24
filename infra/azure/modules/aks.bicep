@@ -6,6 +6,7 @@ param tags object = {}
 
 param netVnet string
 param netSubnet string
+param principalId string
 param logsWorkspaceId string = ''
 
 param kube object = {
@@ -15,23 +16,23 @@ param kube object = {
   nodeCountMax: 10
 }
 
-@description('This is the built-in Azure Kubernetes Service RBAC Cluster Admin role. See https://docs.microsoft.com/azure/role-based-access-control/built-in-roles#azure-kubernetes-service-rbac-cluster-admin')
-resource aksRbacClusterAdminRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
-  scope: subscription()
-  name: 'b1ff04bb-8a4e-4dc4-8eb5-8693973ce19b'
-}
-
 var addOns = {
   azurepolicy: {
     enabled: true
   }
-  // Enable monitoring add on, only if logsWorkspaceId is set
+  azureKeyvaultSecretsProvider: {
+    config: {
+      enableSecretRotation: 'false'
+    }
+    enabled: true
+  }
+   // Enable monitoring add on, only if logsWorkspaceId is set
   omsagent: logsWorkspaceId != '' ? {
     enabled: true
     config: {
       logAnalyticsWorkspaceResourceID: logsWorkspaceId
     }
-  } : {}
+  }: {}
 }
 
 resource aks 'Microsoft.ContainerService/managedClusters@2020-12-01' = {
@@ -42,12 +43,16 @@ resource aks 'Microsoft.ContainerService/managedClusters@2020-12-01' = {
     type: 'SystemAssigned'
   }
   tags: union(tags, {'control-plane-type': 'K8'})
-
+  
   properties: {
     dnsPrefix: name
     kubernetesVersion: kube.version
     enableRBAC: true
-
+    aadProfile: {
+      managed: true
+      enableAzureRBAC: true
+      tenantID: subscription().tenantId
+    }
     agentPoolProfiles: [
       {
         name: 'default'
@@ -82,6 +87,25 @@ resource aks 'Microsoft.ContainerService/managedClusters@2020-12-01' = {
   }
 }
 
+resource adminRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, resourceGroup().id, 'aks-admin-${principalId}')
+  scope: aks
+  properties: {
+    // Azure Kubernetes Service Cluster Admin Role
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', '0ab0b1a8-8aac-4efd-b8c2-3ee1fb270be8')
+    principalId: principalId
+  }
+}
+resource userRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, resourceGroup().id, 'aks-user-${principalId}')
+  scope: aks
+  properties: {
+    // Azure Kubernetes Service Cluster User Role
+    roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', '4abbcc35-e782-43d8-92c5-2d3f1bd2253f')
+    principalId: principalId
+  }
+}
+
 output clusterName string = aks.name
 output clusterFQDN string = aks.properties.fqdn
 output provisioningState string = aks.properties.provisioningState
@@ -91,4 +115,11 @@ output clusterIdentity object = {
   clientId: aks.properties.identityProfile.kubeletidentity.clientId
   objectId: aks.properties.identityProfile.kubeletidentity.objectId
   resourceId: aks.properties.identityProfile.kubeletidentity.resourceId
+}
+
+@description('The Keyvault Provider Worker cluster identity')
+output keyvaultProviderIdentity object = {
+  clientId: aks.properties.addonProfiles.azureKeyvaultSecretsProvider.identity.clientId
+  objectId: aks.properties.addonProfiles.azureKeyvaultSecretsProvider.identity.objectId
+  resourceId: aks.properties.addonProfiles.azureKeyvaultSecretsProvider.identity.resourceId
 }
